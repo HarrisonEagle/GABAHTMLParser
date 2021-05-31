@@ -101,16 +101,12 @@ func ParseHTML(lines []string) *Element {
 	isComment := false
 	isFillingAttr := false
 	TagOpen := false
-	stacksize := 0
-	temp := 0
 	key := ""
-	for i, line := range lines {
-		temp+=i
+	for _, line := range lines {
 		line = strings.Replace(line, "<", "|<", -1)
 		line = strings.Replace(line, ">", ">|", -1)
 		words := strings.FieldsFunc(line, Split)
 		for _, word := range words {
-			//time.Sleep(time.Second)
 			if TagOpen && (!strings.HasPrefix(word, "<") || !strings.HasPrefix(word, "</") || strings.HasPrefix(word, "<!")) {
 				if pointer.Parent.InnerHTML == "" {
 					pointer.Parent.InnerHTML = word
@@ -137,13 +133,11 @@ func ParseHTML(lines []string) *Element {
 						pointer.Parent.InnerHTML += (" " + word)
 						pointer = pointer.Parent
 					}
-					stacksize--
 					TagOpen = false
 					isFillingAttr = false
 				} else if strings.HasPrefix(word, "<") && pointer.Tag != "script" && pointer.Tag != "noscript" && pointer.Tag != "style"{
 					TagOpen = true
 					isFillingAttr = false
-					stacksize++
 					var Child *Element = new(Element)
 					Child.InnerHTML = ""
 					Child.Attr = make(map[string]string)
@@ -160,15 +154,8 @@ func ParseHTML(lines []string) *Element {
 						pointer.Tag = strings.Replace(pointer.Tag, ">", "", -1)
 						TagOpen = false
 					}
-					/*
-					fmt.Print(pointer.Tag+" ")
-					fmt.Print(stacksize)
-					fmt.Print("  line:")
-					fmt.Println(i)
-					*/
 					if pointer.Tag == "br" || pointer.Tag == "wbr"{
 						pointer = pointer.Parent
-						stacksize--
 						TagOpen = false
 						isFillingAttr = false
 					}
@@ -218,7 +205,6 @@ func ParseHTML(lines []string) *Element {
 							if pointer.Parent != nil {
 								pointer = pointer.Parent
 							}
-							stacksize--
 						}
 						isFillingAttr = false
 						TagOpen = false
